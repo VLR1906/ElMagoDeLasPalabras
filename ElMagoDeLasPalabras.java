@@ -40,8 +40,13 @@ public class ElMagoDeLasPalabras {
         for (int ronda = 1; ronda <= 3; ronda++) {
             System.out.println("\n--- RONDA " + ronda + " ---");
             palabrasUsadasGlobal.clear();
+
+            // Generar letras compartidas
+            List<Character> letrasCompartidas = generarLetrasCompartidas();
+
+            // Asignarlas a todos los jugadores
             for (Jugador jugador : jugadores) {
-                asignarLetras(jugador);
+                jugador.setLetras(new ArrayList<>(letrasCompartidas));
             }
 
             boolean continuar = true;
@@ -49,7 +54,11 @@ public class ElMagoDeLasPalabras {
                 continuar = false;
                 for (Jugador jugador : jugadores) {
                     System.out.println("\nTurno de " + jugador.getNombre());
-                    System.out.println("Tus letras: " + jugador.getLetras());
+                    System.out.println("Letras: " + jugador.getLetras());
+                    if (!palabrasUsadasGlobal.isEmpty()) {
+                        System.out.println("Palabras adivinadas hasta ahora: " + palabrasUsadasGlobal);
+                    }
+
                     System.out.print("Escribe una palabra (o presiona ENTER para pasar): ");
                     String palabra = scanner.nextLine().toLowerCase();
 
@@ -61,7 +70,7 @@ public class ElMagoDeLasPalabras {
                     }
 
                     if (!puedeFormarPalabra(palabra, jugador.getLetras())) {
-                        System.out.println("¡No puedes formar esa palabra con tus letras!");
+                        System.out.println("¡No puedes formar esa palabra con las letras disponibles!");
                         jugador.agregarPuntaje(-5);
                         continue;
                     }
@@ -100,14 +109,28 @@ public class ElMagoDeLasPalabras {
         System.out.println("\n¡El ganador es " + ganador.getNombre() + " con " + ganador.getPuntaje() + " puntos!");
     }
 
-    private void asignarLetras(Jugador jugador) {
+    private List<Character> generarLetrasCompartidas() {
         List<Character> letras = new ArrayList<>();
-        String letrasDisponibles = "aeioulnrstgmpbcdfhjkvz";
-        for (int i = 0; i < 10; i++) {
-            letras.add(letrasDisponibles.charAt(random.nextInt(letrasDisponibles.length())));
+        String vocales = "aeiou";
+        String consonantes = "lnrstgmpbcdfhjkvz";
+
+        int cantidadVocales = 3 + random.nextInt(2); // 3 o 4 vocales
+
+        // Agregar vocales
+        for (int i = 0; i < cantidadVocales; i++) {
+            letras.add(vocales.charAt(random.nextInt(vocales.length())));
         }
-        jugador.setLetras(letras);
+
+        // Agregar consonantes para completar 10 letras
+        while (letras.size() < 10) {
+            letras.add(consonantes.charAt(random.nextInt(consonantes.length())));
+        }
+
+        // Mezclar letras para que no estén agrupadas
+        Collections.shuffle(letras);
+        return letras;
     }
+
 
     private int calcularPuntos(String palabra) {
         int puntos = 0;
